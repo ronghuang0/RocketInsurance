@@ -1,12 +1,16 @@
 import React, { Component } from 'react';
+import { Header, Image } from 'semantic-ui-react';
 import RatingInformation from './Components/RatingInformation/RatingInformation';
+import QuoteOverview from './Components/QuoteOverview/QuoteOverview';
 import ErrorModal from './Components/ErrorModal/ErrorModal';
+import getQuote from './requests';
+import styles from './App.css';
 
-class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentStep: '0',
+      currentStep: 'RatingInformation',
       loading: false,
       firstName: '',
       lastName: '',
@@ -17,10 +21,19 @@ class App extends Component {
         region: '',
         postal: '',
       },
-      // deductibleOptions: [],
-      // asteroidCollisionOptions: [],
-      // deductibleSelection: undefined,
-      // asteroidCollisionSelection: undefined
+      premium: undefined,
+      deductible: {
+        title: '',
+        description: '',
+        values: [],
+        selection: undefined,
+      },
+      asteroidCollision: {
+        title: '',
+        description: '',
+        values: [],
+        selection: undefined,
+      },
     };
   }
 
@@ -39,48 +52,58 @@ class App extends Component {
       postal,
     } = address;
 
-    const req = {
-      first_name: firstName,
-      last_name: lastName,
-      address: {
-        line_1: line1,
-        line_2: line2,
-        city,
-        region,
-        postal,
-      },
-    };
     this.setState({ loading: true });
     try {
-      const resp = await fetch('https://fed-challenge-api.sure.now.sh/api/v1/quotes', {
-        method: 'post',
-        body: JSON.stringify(req),
-      });
+      const req = {
+        first_name: firstName,
+        last_name: lastName,
+        address: {
+          line_1: line1,
+          line_2: line2,
+          city,
+          region,
+          postal,
+        },
+      };
+      const resp = await getQuote(req);
       if (!resp.ok) {
         throw resp;
       }
-      const json = await resp.json();
+      const { quote } = await resp.json();
+      const { premium } = quote;
+      const { deductible } = quote.variable_options;
+      deductible.selection = quote.variable_selections.deductible;
+      const asteroidCollision = quote.variable_options.asteroid_collision;
+      asteroidCollision.selection = quote.variable_selections.asteroid_collision;
+      this.setState({
+        currentStep: 'QuoteOverview',
+        premium,
+        deductible,
+        asteroidCollision,
+      });
     } catch (error) {
       try {
         const body = await error.json();
-        // Here is already the payload from API
-        console.log(body);
+        const errorMap = {
+          invalid_postal_code: 'Invalid Zip Code',
+        };
         this.setState({
-          error: body.errors.address.postal,
+          error: errorMap[body.errors.address.postal],
         });
       } catch (e) {
-        console.log("Error parsing promise");
-        console.log(error);
         this.setState({
-          error: 'error',
+          error: 'Error',
         });
       }
     }
     this.setState({ loading: false });
   }
 
-  handleBack = () => {
-
+  handleBack = (e) => {
+    e.preventDefault();
+    this.setState({
+      currentStep: 'RatingInformation',
+    });
   }
 
   resetError = () => {
@@ -89,15 +112,14 @@ class App extends Component {
     });
   }
 
-  handleChange = (e) => {
-    const { name, value } = e.target;
-    if (name.includes('address')) {
-      const addressDetail = name.slice(7).toLowerCase();
+  handleChange = (e, { name, value }) => {
+    if (name.includes('-')) {
+      const stateSections = name.split('-');
       this.setState((state) => (
         {
-          address: {
-            ...state.address,
-            [addressDetail]: value,
+          [stateSections[0]]: {
+            ...state[stateSections[0]],
+            [stateSections[1]]: value,
           },
         }
       ));
@@ -116,10 +138,18 @@ class App extends Component {
       address,
       loading,
       error,
+      deductible,
+      asteroidCollision,
+      premium,
     } = this.state;
+
     return (
       <>
-        { currentStep === '0'
+        <Header id={styles.header} as='h1'>
+          <Image src='/assets/rocket.png' />
+          Rocket Insurance
+        </Header>
+        { currentStep === 'RatingInformation'
           && (
             <RatingInformation
               loading={loading}
@@ -130,12 +160,19 @@ class App extends Component {
               address={address}
             />
           )}
-        { /* currentStep === 1 && <QuoteOverview handleChange = {handleChange}/> */ }
+        { currentStep === 'QuoteOverview'
+          && (
+          <QuoteOverview
+            deductible={deductible}
+            asteroidCollision={asteroidCollision}
+            premium={premium}
+            handleChange={this.handleChange}
+            handleBack={this.handleBack}
+          />
+          )}
         { error
-          && <ErrorModal open={!!error} resetError={this.resetError} />}
+          && <ErrorModal open={!!error} resetError={this.resetError} message={error} />}
       </>
     );
   }
 }
-
-export default App;

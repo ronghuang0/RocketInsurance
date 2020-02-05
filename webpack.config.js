@@ -1,6 +1,9 @@
 module.exports = {
   devtool: 'source-map',
-  stats: 'minimal',
+  stats: {
+    modules: false,
+    warnings: false,
+  },
   entry: './src/index.js',
   output: {
     path: __dirname,
@@ -13,15 +16,6 @@ module.exports = {
         exclude: /node_modules/,
         loader: 'babel-loader',
       },
-      // {
-      //   test: /\.(png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
-      //   use: {
-      //     loader: 'url-loader',
-      //     options: {
-      //       limit: 100000,
-      //     },
-      //   },
-      // },
       {
         test: /\.css$/i,
         use: [
@@ -29,7 +23,6 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              // importLoaders: 1,
               modules: true,
             },
           },

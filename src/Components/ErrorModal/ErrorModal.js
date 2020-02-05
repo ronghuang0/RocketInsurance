@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button, Modal } from 'semantic-ui-react';
 
-const ErrorModal = ({ open, resetError }) => (
+const ErrorModal = ({ open, resetError, message }) => (
   <Modal size='medium' open={open} onClose={resetError}>
     <Modal.Header>Something Went Wrong</Modal.Header>
     <Modal.Content>
-      <p>Invalid Postal Code</p>
+      <p>{message}</p>
     </Modal.Content>
     <Modal.Actions>
       <Button

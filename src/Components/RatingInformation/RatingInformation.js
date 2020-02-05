@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Button } from 'semantic-ui-react';
+import { Form, Button, Header } from 'semantic-ui-react';
 import styles from './RatingInformation.css';
 
 export default class RatingInformation extends Component {
@@ -11,7 +11,6 @@ export default class RatingInformation extends Component {
 
   render() {
     const {
-      currentStep,
       loading,
       handleNext,
       handleChange,
@@ -19,7 +18,6 @@ export default class RatingInformation extends Component {
       lastName,
       address,
     } = this.props;
-
 
     const {
       line1,
@@ -29,32 +27,34 @@ export default class RatingInformation extends Component {
       postal,
     } = address;
     return (
-      <div>
-        <Form className={styles.form} onSubmit={handleNext}>
-          <Form.Input size='large' label='First Name' type='text' name='firstName' value={firstName} onChange={handleChange} />
-          <Form.Input size='large' label='Last Name' type='text' name='lastName' value={lastName} onChange={handleChange} />
-          <Form.Input size='large' label='Street Address' type='text' name='addressLine1' placeholder='Apartment, suite, unit, building, floor, etc.' value={line1} onChange={handleChange} />
-          <Form.Input size='large' type='text' name='addressLine2' placeholder='Street and number, P.O. box, c/o.' value={line2} onChange={handleChange} />
-          <Form.Input size='large' label='City' type='text' name='addressCity' value={city} onChange={handleChange} />
-          <Form.Input size='large' label='State' type='text' name='addressRegion' value={region} onChange={handleChange} />
-          <Form.Input size='large' label='Zip Code' type='text' name='addressPostal' value={postal} onChange={handleChange} />
-          <br />
-          <Button.Group size='large' fluid>
-            <Button labelPosition='left' icon='left chevron' content='Back' disabled />
-            <Button
-              type='submit'
-              labelPosition='right'
-              icon='right chevron'
-              content='Next'
-              disabled={
-                !firstName || !lastName || !line1 || !line2 || !city || !region || !postal
-              }
-              loading={loading}
-            />
-          </Button.Group>
-          <br />
-        </Form>
-      </div>
+      <Form className={styles.form} onSubmit={handleNext}>
+        <Header as='h2'>
+          Enter your information to see a quote:
+        </Header>
+        <br />
+        <Form.Input size='large' label='First Name' type='text' name='firstName' value={firstName} onChange={handleChange} />
+        <Form.Input size='large' label='Last Name' type='text' name='lastName' value={lastName} onChange={handleChange} />
+        <Form.Input size='large' label='Street Address' type='text' name='address-line1' placeholder='Street and number' value={line1} onChange={handleChange} />
+        <Form.Input size='large' type='text' name='address-line2' placeholder='Apartment, suite, unit, building, floor' value={line2} onChange={handleChange} />
+        <Form.Input size='large' label='City' type='text' name='address-city' value={city} onChange={handleChange} />
+        <Form.Input size='large' label='State' type='text' name='address-region' value={region} onChange={handleChange} />
+        <Form.Input size='large' label='Zip Code' type='text' name='address-postal' value={postal} onChange={handleChange} />
+        <br />
+        <Button.Group size='large' fluid>
+          <Button labelPosition='left' icon='left chevron' content='Back' disabled />
+          <Button
+            type='submit'
+            labelPosition='right'
+            icon='right chevron'
+            content='Next'
+            disabled={
+              !firstName || !lastName || !line1 || !city || !region || !postal
+            }
+            loading={loading}
+          />
+        </Button.Group>
+        <br />
+      </Form>
     );
   }
 }
